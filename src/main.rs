@@ -4,7 +4,7 @@ mod repository;
 
 use repository::ddb::DDBRepository;
 
-use api::task::get_task;
+use api::task::{complete_task, get_task, start_task, submit_task};
 
 use actix_web::{middleware::Logger, web::Data, App, HttpServer};
 
@@ -20,7 +20,13 @@ async fn main() -> std::io::Result<()> {
         let ddb_repo: DDBRepository = DDBRepository::init(String::from("task"), config.clone());
         let ddb_data = Data::new(ddb_repo);
         let logger = Logger::default();
-        App::new().wrap(logger).app_data(ddb_data).service(get_task)
+        App::new()
+            .wrap(logger)
+            .app_data(ddb_data)
+            .service(get_task)
+            .service(start_task)
+            .service(submit_task)
+            .service(complete_task)
     })
     .bind(("127.0.0.1", 8000))?
     .run()
